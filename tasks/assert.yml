@@ -1,0 +1,64 @@
+---
+
+- name: Check smb_file value
+  assert:
+    that:
+      - smb_file is string
+      - smb_file | length > 0
+    quiet: yes
+  when: smb_file is defined
+
+- name: Check smb_users list
+  assert:
+    that:
+      - smb_users is iterable
+    quiet: yes
+  when: smb_users is defined
+
+- name: Check smb_users items values
+  assert:
+    that:
+      - item.name is string
+      - item.name | length > 0
+      - item.password is string
+      - item.password | length > 0
+    quiet: yes
+  when: smb_users is defined
+  loop: "{{ smb_users }}"
+
+- name: Check smb_users_remove list
+  assert:
+    that:
+      - smb_users_remove is iterable
+    quiet: yes
+  when: smb_users_remove is defined
+
+- name: Check smb_users_remove items values
+  assert:
+    that:
+      - item is string
+      - item | length > 0
+    quiet: yes
+  when: smb_users_remove is defined
+  loop: "{{ smb_users_remove }}"
+
+- name: Check selinux booleans
+  assert:
+    that:
+      - vars[item] | type_debug == 'bool'
+    quiet: yes
+  when: vars[item] is defined
+  loop:
+    - smb_samba_export_all_ro
+    - smb_samba_export_all_rw
+    - smb_allow_smbd_anon_write
+    - smb_enable_home_dirs
+    - smb_create_home_dirs
+    - smb_domain_controller
+    - smb_share_fusefs
+    - smb_virt_use_samba
+    - smb_share_nfs
+    - smb_run_unconfined
+    - smb_portmapper
+    - smb_use_samba_home_dirs
+    - smb_sanlock_use_samba

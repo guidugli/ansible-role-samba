@@ -1,0 +1,60 @@
+---
+# defaults file for samba
+
+# Specify the file to be copied to the target
+# device as samba configuration (smb.conf)
+#smb_file: server_smb.conf
+
+# samba users to add (smbpasswd -a username)
+# NOTE: The users must exist on linux or it will fail
+#smb_users:
+#  - name: operator
+#    password: mypasswor12
+
+# samba users to remove (smbpasswd -x username)
+#smb_users_remove:
+#  - operator
+
+#### SAMBA SELINUX BOOLEANS ####
+
+# Set selinux to allow sharing of any standard directory read/only.
+#smb_samba_export_all_ro: no
+
+# Set selinux to allow sharing of any standard directory read/write.
+#smb_samba_export_all_rw: no
+
+# If you want to allow samba to modify public files used for public
+# file transfer services. Files/Directories must be labeled
+# public_content_rw_t, you must turn on the allow_smbd_anon_write boolean.
+#smb_allow_smbd_anon_write: no
+
+# Allow samba to enable sharing home dirs
+#smb_enable_home_dirs: no
+
+# Allow samba to create home dirs (e.g. via PAM)
+#smb_create_home_dirs: no
+
+# allow samba to act as the domain controller, add users, groups and change passwords
+#smb_domain_controller: no
+
+# allow samba to export ntfs/fusefs volumes
+#smb_share_fusefs: no
+
+# allow virt to manage cifs files
+#smb_virt_use_samba: no
+
+# allow samba to export NFS volumes
+#smb_share_nfs: no
+
+# allow samba to run unconfined scripts
+#smb_run_unconfined: no
+
+# allow samba to act as a portmapper
+#smb_portmapper: no
+
+# If you want to support SAMBA home directories,
+# you must turn on the use_samba_home_dirs boolean.
+#smb_use_samba_home_dirs: no
+
+# allow sanlock to manage cifs files
+#smb_sanlock_use_samba: no

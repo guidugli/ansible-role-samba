@@ -1,0 +1,37 @@
+---
+# vars file for samba
+
+smb_conf_dir: /etc/samba
+smb_conf_file: smb.conf
+smb_owner: root
+smb_group: root
+smb_mode: '0640'
+
+_smb_service_names:
+  default: ['smb', 'nmb']
+  Ubuntu: ['smbd', 'nmbd']
+  Debian: ['smbd', 'nmbd']
+
+smb_service_names: "{{ _smb_service_names[ansible_distribution ~ '-' ~ ansible_distribution_major_version] |
+                   default(_smb_service_names[ansible_distribution]) | default(_smb_service_names['default']) }}"
+
+_smb_packages:
+  default: ['samba', 'samba-client']
+
+smb_packages: "{{ _smb_packages[ansible_distribution ~ '-' ~ ansible_distribution_major_version] |
+              default(_smb_packages[ansible_distribution]) | default(_smb_packages['default']) }}"
+
+smb_sebool_map:
+  smb_samba_export_all_ro: samba_export_all_ro
+  smb_samba_export_all_rw: samba_export_all_rw
+  smb_allow_smbd_anon_write: allow_smbd_anon_write
+  smb_enable_home_dirs: samba_enable_home_dirs
+  smb_create_home_dirs: samba_create_home_dirs
+  smb_domain_controller: samba_domain_controller
+  smb_share_fusefs: samba_share_fusefs
+  smb_virt_use_samba: virt_use_samba
+  smb_share_nfs: samba_share_nfs
+  smb_run_unconfined: samba_run_unconfined
+  smb_portmapper: samba_portmapper
+  smb_use_samba_home_dirs: use_samba_home_dirs
+  smb_sanlock_use_samba: sanlock_use_samba

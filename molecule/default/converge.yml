@@ -1,0 +1,22 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    smb_users:
+      - name: nobody
+        password: mypassword
+    smb_samba_export_all_ro: no
+    smb_samba_export_all_rw: no
+    smb_allow_smbd_anon_write: no
+    smb_enable_home_dirs: no
+    smb_create_home_dirs: no
+    smb_domain_controller: no
+    smb_share_fusefs: no
+    smb_virt_use_samba: no
+    smb_share_nfs: no
+    smb_run_unconfined: no
+    smb_portmapper: no
+    smb_use_samba_home_dirs: no
+    smb_sanlock_use_samba: no
+  roles:
+    - guidugli.samba
