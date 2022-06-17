@@ -1,7 +1,7 @@
 ---
 
 - name: "Check if user {{ item.name }} already exists"
-  command: "pdbedit -w -L {{ item.name }}"
+  ansible.builtin.command: "pdbedit -w -L {{ item.name }}"
   changed_when: false
   failed_when:
     - smb_cmd_result.rc not in [0, 255]
@@ -9,7 +9,7 @@
   register: smb_cmd_result
 
 - name: "Create user {{ item.name }} if it does not exist"
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     (echo '{{ item.password }}'; echo '{{ item.password }}') |
     smbpasswd -s -a {{ item.name }}
@@ -24,7 +24,7 @@
   vars:
     oldpwd: "{{ smb_cmd_result.stdout.split(':')[3] }}"
     newpwd: "{{ item.password | nt_hash | upper }}"
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     (echo '{{ item.password }}'; echo '{{ item.password }}') |
     smbpasswd -s -a {{ item.name }}

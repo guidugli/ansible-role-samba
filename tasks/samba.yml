@@ -1,19 +1,19 @@
 ---
 
 - name: Ensure samba packages are installed
-  package:
+  ansible.builtin.package:
     name: "{{ smb_packages }}"
     state: present
     update_cache: yes
 
 - name: Enable services
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: yes
   loop: "{{ smb_service_names }}"
 
 - name: Copy configuration file to destination
-  copy:
+  ansible.builtin.copy:
     src: "{{ smb_file }}"
     dest: "{{ smb_conf_dir }}/{{ smb_conf_file }}"
     owner: "{{ smb_owner }}"
@@ -26,7 +26,7 @@
   notify: restart samba
 
 - name: Set selinux boolean values
-  seboolean:
+  ansible.builtin.seboolean:
     name: "{{ smb_sebool_map[item] }}"
     state: "{{ vars[item] }}"
     persistent: yes
@@ -53,14 +53,14 @@
 # Need another task file because it needs several
 # tasks in a loop
 - name: Adding users / update passwords
-  include_tasks: smbadduser.yml
+  ansible.builtin.include_tasks: smbadduser.yml
   when: smb_users is defined
   loop: "{{ smb_users }}"
   loop_control:
     label: "{{ item.name }}"
 
 - name: Deleting users
-  command: "smbpasswd -x {{ item }}"
+  ansible.builtin.command: "smbpasswd -x {{ item }}"
   register: smb_cmd_result
   changed_when: smb_cmd_result.rc == 0
   failed_when:

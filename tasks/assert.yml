@@ -1,7 +1,7 @@
 ---
 
 - name: Check smb_file value
-  assert:
+  ansible.builtin.assert:
     that:
       - smb_file is string
       - smb_file | length > 0
@@ -9,14 +9,14 @@
   when: smb_file is defined
 
 - name: Check smb_users list
-  assert:
+  ansible.builtin.assert:
     that:
       - smb_users is iterable
     quiet: yes
   when: smb_users is defined
 
 - name: Check smb_users items values
-  assert:
+  ansible.builtin.assert:
     that:
       - item.name is string
       - item.name | length > 0
@@ -27,14 +27,14 @@
   loop: "{{ smb_users }}"
 
 - name: Check smb_users_remove list
-  assert:
+  ansible.builtin.assert:
     that:
       - smb_users_remove is iterable
     quiet: yes
   when: smb_users_remove is defined
 
 - name: Check smb_users_remove items values
-  assert:
+  ansible.builtin.assert:
     that:
       - item is string
       - item | length > 0
@@ -43,7 +43,7 @@
   loop: "{{ smb_users_remove }}"
 
 - name: Check selinux booleans
-  assert:
+  ansible.builtin.assert:
     that:
       - vars[item] | type_debug == 'bool'
     quiet: yes

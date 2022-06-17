@@ -2,7 +2,7 @@
 # handlers file for samba
 
 - name: restart samba
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ smb_service_names }}"
