@@ -23,7 +23,7 @@
     force: yes
     validate: testparm -s %s
   when: smb_file is defined
-  notify: restart samba
+  notify: Restart samba
 
 - name: Set selinux boolean values
   ansible.builtin.seboolean:
@@ -48,7 +48,7 @@
     - smb_portmapper
     - smb_use_samba_home_dirs
     - smb_sanlock_use_samba
-  notify: restart samba
+  notify: Restart samba
 
 # Need another task file because it needs several
 # tasks in a loop

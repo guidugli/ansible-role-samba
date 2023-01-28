@@ -1,8 +1,8 @@
 ---
 # tasks file for samba
 
-- name: include assert.yml
+- name: Include assert.yml
   ansible.builtin.include_tasks: assert.yml
 
-- name: include samba.yml
+- name: Include samba.yml
   ansible.builtin.include_tasks: samba.yml
