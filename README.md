@@ -6,7 +6,7 @@ An Ansible Role that install and configures samba on RedHat/CentOS, Debian/Ubunt
 Requirements
 ------------
 
-No requirements.
+This role requires pycryptodome python library.
 
 Role Variables
 --------------
