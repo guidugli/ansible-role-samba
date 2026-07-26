@@ -1,145 +1,259 @@
-Ansible Role: samba
-=========
+[![CI](https://github.com/guidugli/samba/actions/workflows/CI.yml/badgettps://github.com/guidugli/samba/actions/workflows/CI.yml)
+[![Release](https://github.com/guidugli/sambakflows/release.yml/badge.svg](https://github.com/guidugli/samba/actions/workflows/release.yml)
+[![Ansible .shields.io/badge/ansible--galaxy-guidugli.samba-blue.svg](https://galaxy.ansible.com/ui/standalone/roles/guidugli/samba/)
+https://img.shields.io/badge/License-MIT-yellow.svg](LICENSE)
 
-An Ansible Role that install and configures samba on RedHat/CentOS, Debian/Ubuntu and Fedora Linux systems.
+# Ansible Role: samba
 
-Requirements
-------------
+Install and configure Samba on Linux systems.
 
-This role requires pycryptodome python library.
+This role:
 
-Role Variables
---------------
+- Installs Samba packages
+- Deploys `smb.conf`
+- Manages Samba users
+- Configures Samba-related SELinux booleans
+- Supports Ubuntu, Debian, and Fedora
+- Includes Molecule test scenarios for both standard and systemd-based environments
 
-**Available variables are listed below, along with default values (see defaults/main.yml):**
+---
 
-    #smb_file: server_smb.conf
+## Requirements
 
-Specify the file to be copied to the target device as samba configuration (smb.conf)
+### Control Node
 
-    #smb_users:
-    #  - name: operator
-    #    password: mypasswor12
+- Ansible Core 2.17+
+- `pycryptodome`
+- Collections:
+  - `ansible.posix >= 1.5.4`
 
-Samba users to add (smbpasswd -a username)
-**NOTE:** The users must exist on linux or it will fail
+### Managed Hosts
 
-    #smb_users_remove:
-    #  - operator
+- Supported package manager
+- Existing Linux accounts for users managed via `smb_users`
 
-Samba users to remove (smbpasswd -x username)
+---
 
-    #smb_samba_export_all_ro: no
+## Supported Platforms
 
-Set selinux to allow sharing of any standard directory read/only.
+The role is tested through Molecule against:
 
-    #smb_samba_export_all_rw: no
+| Distribution | Versions |
+|-------------|----------|
+| Ubuntu | 24.04, 26.04 |
+| Debian | 12, 13 |
+| Fedora | 43, 44 |
 
-Set selinux to allow sharing of any standard directory read/write.
+---
 
-    #smb_allow_smbd_anon_write: no
+## Variables
 
-If you want to allow samba to modify public files used for public file transfer services. Files/Directories must be labeled public_content_rw_t, you must turn on the allow_smbd_anon_write boolean.
+### smb_file
 
-    #smb_enable_home_dirs: no
+Name of the Samba configuration file located in the role `files/` directory.
 
-Allow samba to enable sharing home dirs
+Default:
 
-    #smb_create_home_dirs: no
+```yaml
+smb_file: ""
+```
 
-Allow samba to create home dirs (e.g. via PAM)
+Example:
 
-    #smb_domain_controller: no
+```yaml
+smb_file: server_smb.conf
+```
 
-Allow samba to act as the domain controller, add users, groups and change passwords
+When specified, the file is deployed as:
 
-    #smb_share_fusefs: no
+```text
+/etc/samba/smb.conf
+```
 
-Allow samba to export ntfs/fusefs volumes
+The configuration is validated using:
 
-    #smb_virt_use_samba: no
+```bash
+testparm -s
+```
 
-Allow virt to manage cifs files
+before replacement.
 
-    #smb_share_nfs: no
+---
 
-Allow samba to export NFS volumes
+### smb_users
 
-    #smb_run_unconfined: no
+List of Samba users to create or update.
 
-Allow samba to run unconfined scripts
+Linux accounts must already exist.
 
-    #smb_portmapper: no
+Default:
 
-Allow samba to act as a portmapper
+```yaml
+smb_users: []
+```
 
-    #smb_use_samba_home_dirs: no
+Example:
 
-If you want to support SAMBA home directories, you must turn on the use_samba_home_dirs boolean.
+```yaml
+smb_users:
+  - name: nobody
+    password: "{{ vault_nobody_password }}"
+```
 
-    #smb_sanlock_use_samba: no
+> It is recommended to store passwords in Ansible Vault rather than in plaintext.
 
-Allow sanlock to manage cifs files
+---
 
-**The variables listed below do not need to be changed for targeted systems (see vars/main.yml):**
+### smb_users_remove
 
-    smb_conf_dir: /etc/samba
+List of Samba users to remove.
 
-Samba configuration directory.
+Default:
 
-    smb_conf_file: smb.conf
+```yaml
+smb_users_remove: []
+```
 
-Samba configuration file.
+Example:
 
-    smb_owner: root
-    smb_group: root
-    smb_mode: '0640'
+```yaml
+smb_users_remove:
+  - olduser
+```
 
-Owner, group and permissions to be set on configuration files.
+---
 
-    smb_service_names:
+### SELinux Booleans
 
-List of services names provided by samba.
+All values default to:
 
-    smb_packages:
+```yaml
+false
+```
 
-List of packages to be installed to provide samba functionality.
+The role applies these settings only when SELinux is enabled.
 
-Dependencies
-------------
+| Variable | SELinux Boolean | Description |
+|-----------|----------------|-------------|
+| smb_samba_export_all_ro | samba_export_all_ro | Export directories read-only |
+| smb_samba_export_all_rw | samba_export_all_rw | Export directories read/write |
+| smb_allow_smbd_anon_write | allow_smbd_anon_write | Allow anonymous writes |
+| smb_enable_home_dirs | samba_enable_home_dirs | Enable home directory shares |
+| smb_create_home_dirs | samba_create_home_dirs | Allow automatic home directory creation |
+| smb_domain_controller | samba_domain_controller | Domain controller functionality |
+| smb_share_fusefs | samba_share_fusefs | Export FUSE filesystems |
+| smb_virt_use_samba | virt_use_samba | Allow virtualization integration |
+| smb_share_nfs | samba_share_nfs | Export NFS volumes |
+| smb_run_unconfined | samba_run_unconfined | Run unconfined scripts |
+| smb_portmapper | samba_portmapper | Enable portmapper support |
+| smb_use_samba_home_dirs | use_samba_home_dirs | Samba home directories |
+| smb_sanlock_use_samba | sanlock_use_samba | Sanlock CIFS support |
 
-No dependencies.
+---
 
-Example Playbook
-----------------
+## Example Playbook
 
-    - hosts: servers
-      vars:
-        smb_users:
-          - name: nobody
-            password: mypassword
-        smb_samba_export_all_ro: no
-        smb_samba_export_all_rw: no
-        smb_allow_smbd_anon_write: no
-        smb_enable_home_dirs: no
-        smb_create_home_dirs: no
-        smb_domain_controller: no
-        smb_share_fusefs: no
-        smb_virt_use_samba: no
-        smb_share_nfs: no
-        smb_run_unconfined: no
-        smb_portmapper: no
-        smb_use_samba_home_dirs: no
-        smb_sanlock_use_samba: no
-      roles:
-         - { role: guidugli.samba }
+```yaml
+---
+- name: Configure Samba servers
+  hosts: samba_servers
+  become: true
 
-License
--------
+  vars:
+    smb_file: server_smb.conf
 
-MIT / BSD
+    smb_users:
+      - name: nobody
+        password: "{{ vault_nobody_password }}"
 
-Author Information
-------------------
+    smb_samba_export_all_ro: false
+    smb_samba_export_all_rw: false
 
-This role was created in 2020 by Carlos Guidugli.
+  roles:
+    - role: guidugli.samba
+```
+
+---
+
+## Molecule Testing
+
+The role includes:
+
+- Default container scenario
+- Systemd-enabled scenario
+
+Local validation:
+
+```bash
+ansible-galaxy collection install -r requirements.yml
+
+yamllint .
+ansible-lint .
+
+molecule test -s default
+molecule test -s systemd
+```
+
+---
+
+## Execution Notes
+
+### Privilege Model
+
+The role intentionally does **not** define:
+
+- `become`
+- `become_user`
+- `become_method`
+
+Privilege escalation is controlled externally.
+
+#### Molecule
+
+Containers run as root:
+
+```yaml
+become: false
+```
+
+#### Real Hosts
+
+Use:
+
+```yaml
+become: true
+```
+
+when required for:
+
+- Package installation
+- Service management
+- SELinux modifications
+- Samba account administration
+- Configuration deployment under `/etc`
+
+---
+
+### Container and Systemd Behavior
+
+The role can execute inside standard containers.
+
+Service operations are executed only when systemd is detected:
+
+```yaml
+when: ansible_facts['service_mgr'] == 'systemd'
+```
+
+The dedicated Molecule systemd scenario validates service-related behavior.
+
+---
+
+## License
+
+MIT
+
+---
+
+## Author
+
+Carlos Guidugli

@@ -1,0 +1,105 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure Samba.
+    description:
+      - Installs Samba packages.
+      - Optionally deploys an smb.conf file from the role files directory.
+      - Optionally manages Samba users and SELinux Samba booleans.
+    options:
+      smb_file:
+        type: str
+        default: ""
+        description:
+          - Name of a file under C(files/) to deploy as C(smb.conf).
+          - Set to an empty string to skip configuration deployment.
+      smb_users:
+        type: list
+        elements: dict
+        default: []
+        description:
+          - Samba users to add or update.
+          - The corresponding Linux user accounts must already exist on the target host.
+        options:
+          name:
+            type: str
+            required: true
+            description:
+              - Existing Linux account name to manage in the Samba password database.
+          password:
+            type: str
+            required: true
+            no_log: true
+            description:
+              - Plaintext password used to create or update the Samba password hash.
+      smb_users_remove:
+        type: list
+        elements: str
+        default: []
+        description:
+          - Samba user names to remove from the Samba password database.
+      smb_samba_export_all_ro:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_export_all_ro) SELinux boolean.
+      smb_samba_export_all_rw:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_export_all_rw) SELinux boolean.
+      smb_allow_smbd_anon_write:
+        type: bool
+        default: false
+        description:
+          - Enable the C(allow_smbd_anon_write) SELinux boolean.
+      smb_enable_home_dirs:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_enable_home_dirs) SELinux boolean.
+      smb_create_home_dirs:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_create_home_dirs) SELinux boolean.
+      smb_domain_controller:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_domain_controller) SELinux boolean.
+      smb_share_fusefs:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_share_fusefs) SELinux boolean.
+      smb_virt_use_samba:
+        type: bool
+        default: false
+        description:
+          - Enable the C(virt_use_samba) SELinux boolean.
+      smb_share_nfs:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_share_nfs) SELinux boolean.
+      smb_run_unconfined:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_run_unconfined) SELinux boolean.
+      smb_portmapper:
+        type: bool
+        default: false
+        description:
+          - Enable the C(samba_portmapper) SELinux boolean.
+      smb_use_samba_home_dirs:
+        type: bool
+        default: false
+        description:
+          - Enable the C(use_samba_home_dirs) SELinux boolean.
+      smb_sanlock_use_samba:
+        type: bool
+        default: false
+        description:
+          - Enable the C(sanlock_use_samba) SELinux boolean.

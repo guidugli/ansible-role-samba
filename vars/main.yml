@@ -8,18 +8,34 @@ smb_group: root
 smb_mode: '0640'
 
 _smb_service_names:
-  default: ['smb', 'nmb']
-  Ubuntu: ['smbd', 'nmbd']
-  Debian: ['smbd', 'nmbd']
+  default:
+    - smb
+    - nmb
+  Ubuntu:
+    - smbd
+    - nmbd
+  Debian:
+    - smbd
+    - nmbd
 
-smb_service_names: "{{ _smb_service_names[ansible_distribution ~ '-' ~ ansible_distribution_major_version] |
-                   default(_smb_service_names[ansible_distribution]) | default(_smb_service_names['default']) }}"
+smb_service_names: >-
+  {{
+    _smb_service_names[ansible_facts['distribution'] ~ '-' ~ ansible_facts['distribution_major_version']]
+    | default(_smb_service_names[ansible_facts['distribution']])
+    | default(_smb_service_names['default'])
+  }}
 
 _smb_packages:
-  default: ['samba', 'samba-client']
+  default:
+    - samba
+    - samba-client
 
-smb_packages: "{{ _smb_packages[ansible_distribution ~ '-' ~ ansible_distribution_major_version] |
-              default(_smb_packages[ansible_distribution]) | default(_smb_packages['default']) }}"
+smb_packages: >-
+  {{
+    _smb_packages[ansible_facts['distribution'] ~ '-' ~ ansible_facts['distribution_major_version']]
+    | default(_smb_packages[ansible_facts['distribution']])
+    | default(_smb_packages['default'])
+  }}
 
 smb_sebool_map:
   smb_samba_export_all_ro: samba_export_all_ro

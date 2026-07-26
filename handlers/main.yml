@@ -1,8 +1,12 @@
 ---
 # handlers file for samba
 
-- name: Restart samba
+- name: Restart Samba
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ smb_service_names }}"
+  when: ansible_facts['service_mgr'] == 'systemd'
+  tags:
+    - samba
+    - service

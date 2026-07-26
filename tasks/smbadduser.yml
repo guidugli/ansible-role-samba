@@ -1,37 +1,53 @@
 ---
-
-- name: "Check if user {{ item.name }} already exists"
-  ansible.builtin.command: "pdbedit -w -L {{ item.name }}"
+- name: Check whether Samba user exists
+  ansible.builtin.command:
+    argv:
+      - pdbedit
+      - -w
+      - -L
+      - "{{ item.name }}"
+  register: smb_user_query
   changed_when: false
   failed_when:
-    - smb_cmd_result.rc not in [0, 255]
-    - smb_cmd_result.rc == 0 and (smb_cmd_result.stdout is not regex('^.+?:.+?:.+?:.+:.+?:.+:'))
-  register: smb_cmd_result
+    - smb_user_query.rc not in [0, 255]
+    - smb_user_query.rc == 0 and (smb_user_query.stdout is not regex('^.+?:.+?:.+?:.+:.+?:.+:'))
+  no_log: true
+  tags:
+    - samba
+    - validate
 
-- name: "Create user {{ item.name }} if it does not exist"
+- name: Create Samba user when absent
   ansible.builtin.shell: |
     set -o pipefail
-    (echo '{{ item.password }}'; echo '{{ item.password }}') |
-    smbpasswd -s -a {{ item.name }}
+    (printf '%s\n' '{{ item.password }}'; printf '%s\n' '{{ item.password }}') |
+    smbpasswd -s -a '{{ item.name }}'
   args:
     executable: /bin/bash
   changed_when: true
   when:
-    - smb_cmd_result is defined
-    - smb_cmd_result.rc == 255
+    - smb_user_query is defined
+    - smb_user_query.rc == 255
+  no_log: true
+  tags:
+    - samba
+    - config
 
-- name: If user did exist, change password if needed
+- name: Update Samba user password when changed
   vars:
-    oldpwd: "{{ smb_cmd_result.stdout.split(':')[3] }}"
-    newpwd: "{{ item.password | nt_hash | upper }}"
+    smb_existing_password_hash: "{{ smb_user_query.stdout.split(':')[3] }}"
+    smb_desired_password_hash: "{{ item.password | nt_hash | upper }}"
   ansible.builtin.shell: |
     set -o pipefail
-    (echo '{{ item.password }}'; echo '{{ item.password }}') |
-    smbpasswd -s -a {{ item.name }}
+    (printf '%s\n' '{{ item.password }}'; printf '%s\n' '{{ item.password }}') |
+    smbpasswd -s -a '{{ item.name }}'
   args:
     executable: /bin/bash
-  changed_when: true
+  changed_when: smb_existing_password_hash != smb_desired_password_hash
   when:
-    - smb_cmd_result is defined
-    - smb_cmd_result.stdout is regex('^.+?:.+?:.+?:.+:.+?:.+:')
-    - oldpwd != newpwd
+    - smb_user_query is defined
+    - smb_user_query.stdout is regex('^.+?:.+?:.+?:.+:.+?:.+:')
+    - smb_existing_password_hash != smb_desired_password_hash
+  no_log: true
+  tags:
+    - samba
+    - config

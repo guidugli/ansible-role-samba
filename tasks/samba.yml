@@ -1,39 +1,48 @@
 ---
-
-- name: Ensure samba packages are installed
+- name: Ensure Samba packages are installed
   ansible.builtin.package:
     name: "{{ smb_packages }}"
     state: present
-    update_cache: yes
+    update_cache: true
+  tags:
+    - samba
+    - install
 
-- name: Enable services
+- name: Enable Samba services when systemd is available
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: yes
+    enabled: true
   loop: "{{ smb_service_names }}"
+  when: ansible_facts['service_mgr'] == 'systemd'
+  tags:
+    - samba
+    - service
 
-- name: Copy configuration file to destination
+- name: Copy Samba configuration file to destination
   ansible.builtin.copy:
     src: "{{ smb_file }}"
     dest: "{{ smb_conf_dir }}/{{ smb_conf_file }}"
     owner: "{{ smb_owner }}"
     group: "{{ smb_group }}"
     mode: "{{ smb_mode }}"
-    backup: yes
-    force: yes
+    backup: true
+    force: true
     validate: testparm -s %s
-  when: smb_file is defined
-  notify: Restart samba
+  when: smb_file | length > 0
+  notify: Restart Samba
+  tags:
+    - samba
+    - config
 
-- name: Set selinux boolean values
+- name: Set SELinux Samba boolean values
   ansible.posix.seboolean:
     name: "{{ smb_sebool_map[item] }}"
     state: "{{ vars[item] }}"
-    persistent: yes
+    persistent: true
   when:
     - vars[item] is defined
-    - ansible_selinux.status is defined
-    - ansible_selinux.status == 'enabled'
+    - ansible_facts['selinux']['status'] is defined
+    - ansible_facts['selinux']['status'] == 'enabled'
   loop:
     - smb_samba_export_all_ro
     - smb_samba_export_all_rw
@@ -48,23 +57,34 @@
     - smb_portmapper
     - smb_use_samba_home_dirs
     - smb_sanlock_use_samba
-  notify: Restart samba
+  notify: Restart Samba
+  tags:
+    - samba
+    - config
 
-# Need another task file because it needs several
-# tasks in a loop
-- name: Adding users / update passwords
+- name: Add or update Samba users
   ansible.builtin.include_tasks: smbadduser.yml
-  when: smb_users is defined
   loop: "{{ smb_users }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
+  tags:
+    - samba
+    - config
 
-- name: Deleting users
-  ansible.builtin.command: "smbpasswd -x {{ item }}"
-  register: smb_cmd_result
-  changed_when: smb_cmd_result.rc == 0
+- name: Delete Samba users when present
+  ansible.builtin.command:
+    argv:
+      - smbpasswd
+      - -x
+      - "{{ item }}"
+  register: smb_remove_result
+  changed_when: smb_remove_result.rc == 0
   failed_when:
-    - smb_cmd_result.rc != 0
-    - smb_cmd_result.stdout is not search('Failed to find entry for user')
+    - smb_remove_result.rc != 0
+    - smb_remove_result.stdout is not search('Failed to find entry for user')
+    - smb_remove_result.stderr is not search('Failed to find entry for user')
   loop: "{{ smb_users_remove }}"
-  when: smb_users_remove is defined
+  tags:
+    - samba
+    - config

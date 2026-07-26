@@ -1,0 +1,26 @@
+---
+- name: Verify samba role
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Check Samba configuration file exists
+      ansible.builtin.stat:
+        path: /etc/samba/smb.conf
+      register: samba_verify_conf
+      changed_when: false
+      tags:
+        - samba
+        - validate
+
+    - name: Assert Samba configuration file was deployed
+      ansible.builtin.assert:
+        that:
+          - samba_verify_conf.stat.exists
+          - samba_verify_conf.stat.isreg
+          - samba_verify_conf.stat.pw_name == 'root'
+          - samba_verify_conf.stat.gr_name == 'root'
+          - samba_verify_conf.stat.mode == '0640'
+        quiet: true
+      tags:
+        - samba
+        - validate

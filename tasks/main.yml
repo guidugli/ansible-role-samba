@@ -1,8 +1,16 @@
 ---
 # tasks file for samba
 
-- name: Include assert.yml
+- name: Include variable validation tasks
   ansible.builtin.include_tasks: assert.yml
+  tags:
+    - samba
+    - validate
 
-- name: Include samba.yml
+- name: Include Samba configuration tasks
   ansible.builtin.include_tasks: samba.yml
+  tags:
+    - samba
+    - install
+    - config
+    - service
