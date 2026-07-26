@@ -1,7 +1,7 @@
-[![CI](https://github.com/guidugli/samba/actions/workflows/CI.yml/badgettps://github.com/guidugli/samba/actions/workflows/CI.yml)
-[![Release](https://github.com/guidugli/sambakflows/release.yml/badge.svg](https://github.com/guidugli/samba/actions/workflows/release.yml)
-[![Ansible .shields.io/badge/ansible--galaxy-guidugli.samba-blue.svg](https://galaxy.ansible.com/ui/standalone/roles/guidugli/samba/)
-https://img.shields.io/badge/License-MIT-yellow.svg](LICENSE)
+[![CI](https://github.com/guidugli/ansible-role-samba/actions/workflows/CI.yml/badge.svg)](https://github.com/guidugli/ansible-role-samba/actions/workflows/CI.yml)
+[![Release](https://img.shields.io/github/v/tag/guidugli/ansible-role-samba?sort=semver)](https://github.com/guidugli/ansible-role-samba/tags)
+[![Galaxy](https://img.shields.io/badge/galaxy-guidugli.samba-blue.svg)](https://galaxy.ansible.com/ui/standalone/roles/guidugli/samba/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 # Ansible Role: samba
 
